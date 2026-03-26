@@ -58,6 +58,11 @@ describe("Ok / Err methods", () => {
 		expect(orElse(ok(42), 7)).toBe(42)
 		expect(orElse(err("E"), 7)).toBe(7)
 	})
+
+	test("unwrap promise", async () => {
+		await expect(unwrap(Promise.resolve(ok(42)))).resolves.toBe(42)
+		await expect(unwrap(Promise.resolve(err("E")))).rejects.toBe("E")
+	})
 })
 
 /* ------------------------------------------------------------------ */

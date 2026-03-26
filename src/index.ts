@@ -106,9 +106,18 @@ export const flatMap = <ValueType, NewValue, ErrorType = unknown>(
 	fn: (v: ValueType) => Result<NewValue, ErrorType>,
 ): Result<NewValue, ErrorType> => (r.ok ? fn(r.value) : r)
 
-export const unwrap = <ValueType, ErrorType = unknown>(
+export function unwrap<ValueType, ErrorType = unknown>(
 	r: Result<ValueType, ErrorType>,
-): ValueType => {
+): ValueType
+export function unwrap<ValueType, ErrorType = unknown>(
+	r: PromiseLike<Result<ValueType, ErrorType>>,
+): Promise<ValueType>
+export function unwrap<ValueType, ErrorType = unknown>(
+	r: Result<ValueType, ErrorType> | PromiseLike<Result<ValueType, ErrorType>>,
+): ValueType | Promise<ValueType> {
+	if (isPromiseLike<Result<ValueType, ErrorType>>(r)) {
+		return Promise.resolve(r).then(value => unwrap(value))
+	}
 	if (r.ok) return r.value
 	throw r.error
 }
