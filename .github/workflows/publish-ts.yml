@@ -1,4 +1,4 @@
-name: Publish TypeScript SDK to npm
+name: Release Please
 
 on:
   push:
@@ -8,46 +8,45 @@ on:
 
 permissions:
   contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
 
 concurrency:
   group: ts-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  publish:
+  release-please:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v4
         with:
-          fetch-depth: 0
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - name: Check out repository
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
+        if: ${{ steps.release.outputs.release_created == 'true' }}
         run: npm ci
 
-      - name: Build project
-        run: npm run build
-
-      - name: Configure Git
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Bump version
-        run: |
-          mkdir -p .git
-          npm version patch -m "chore: bump version to %s [skip ci]"
-          git push
-          git push --tags
+      - name: Run tests
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        run: npm test
 
       - name: Publish to npm
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        run: npm publish --provenance --access public
