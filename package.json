@@ -1,12 +1,12 @@
 {
 	"name": "okay-error",
-	"version": "1.0.4",
+	"version": "1.0.3",
 	"author": "Henry Mao",
 	"private": false,
 	"description": "A small opinionated library to bring Rust-like results idiomatically to TypeScript.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/smithery-ai/rslt.git"
+		"url": "git+https://github.com/smithery-ai/okay-error.git"
 	},
 	"main": "dist/index.js",
 	"types": "src/index.ts",
